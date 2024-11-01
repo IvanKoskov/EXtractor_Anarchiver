@@ -3,4 +3,12 @@
 
  The EXtractor tries to deliever convenient interaction with files, zipping, unzipping, password zipping and range of functionalities without any payment.
  
- • Inspired by [RAR Extractor - Unarchiver Pro](https://apps.apple.com/th/app/rar-extractor-unarchiver-pro/id647505820?mt=12)
+ • Inspired by [RAR Extractor - Unarchiver Pro](https://apps.apple.com/th/app/rar-extractor-unarchiver-pro/id647505820?mt=12).
+ 
+ • EXtractor planned to be enhanced version of it.
+
+ • Everyone is very welcomed to contribute to this project
+
+ • The GUI is developed using C++ frameworks and Qmake as it allowed to use C++.
+
+ • > "Example App" Not Opened Apple could not verify "Example App" is free of malware that may harm your Mac or compromise your privacy.
