@@ -23,7 +23,7 @@ Moreover for such errors to not be shown app needs to be code signed so that is 
 > If you see strange errors just share them to us so they can be fixed.
 
 
-> [!TAKE NOTE]
+> [!CAUTION]
 > As this app can interact with system files and needs disk access just be sure you are not doing stupid things)
 
  ## What will be achieved?
