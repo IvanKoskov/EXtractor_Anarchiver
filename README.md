@@ -18,3 +18,11 @@
 To bypass the "Apple could not verify..." message, go to **System Preferences > Security & Privacy**, then click **Open Anyway** next to the app's name. Alternatively, control-click the app in Finder and select **Open** to confirm you want to run it.
 
 Moreover for such errors to not be shown app needs to be code signed so that is why it says it is not trusted.
+
+> [!TIP]
+> If you see strange errors just share them to us so they can be fixed.
+
+
+ ## What will be achieved?
+
+ 
