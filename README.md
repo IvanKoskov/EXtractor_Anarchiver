@@ -28,4 +28,4 @@ Moreover for such errors to not be shown app needs to be code signed so that is 
 
  ## What will be achieved?
 
- 
+ • We are planning to add our own functionality besides the default one in order to make even more attractive to user
