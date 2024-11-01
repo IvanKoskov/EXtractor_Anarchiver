@@ -16,3 +16,5 @@
  > "Example App" Not Opened Apple could not verify "Example App" is free of malware that may harm your Mac or compromise your privacy.
 
 To bypass the "Apple could not verify..." message, go to **System Preferences > Security & Privacy**, then click **Open Anyway** next to the app's name. Alternatively, control-click the app in Finder and select **Open** to confirm you want to run it.
+
+Moreover for such errors to not be shown app needs to be code signed so that is why it says it is not trusted.
