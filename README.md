@@ -11,5 +11,6 @@
 
  • The GUI is developed using C++ frameworks and Qmake as it allowed to use C++.
 
- •
+ ## You may encounter such error
+ 
  > "Example App" Not Opened Apple could not verify "Example App" is free of malware that may harm your Mac or compromise your privacy.
