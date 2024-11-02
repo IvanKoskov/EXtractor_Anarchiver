@@ -34,7 +34,7 @@ Moreover for such errors to not be shown app needs to be code signed so that is 
 
 
  # Thanks to!
-[LibZip](https://github.com/nih-at/libzip) most of functionality relies on this. 
+[LibZip](https://github.com/nih-at/libzip) most of functionality relies on this. 🫡👨🏼‍🔬
 
 > [!NOTE]
 > that is actually my first Mac OS project 🙃
