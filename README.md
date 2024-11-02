@@ -31,3 +31,7 @@ Moreover for such errors to not be shown app needs to be code signed so that is 
  • We are planning to add our own functionality besides the default one in order to make even more attractive to user
 
  > IF YOU WANT TO CONTACT ME CONSIDER FINDING ME [HERE](https://t.me/Evan_Matthew).
+
+
+ # Thanks to
+[LibZip](https://github.com/nih-at/libzip) most of functionality relies on this.
