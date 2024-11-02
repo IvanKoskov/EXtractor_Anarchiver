@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/rec">
+        <file>warningmac2.png</file>
+        <file>download-icon-png-43822.png</file>
+        <file>istockphoto2.jpg</file>
+        <file>bluredbac2.jpg</file>
+        <file>archivecon2.png</file>
+        <file>backbode2.svg</file>
+        <file>techsupp.png</file>
+        <file>perfect-heart-shape22.png</file>
+        <file>greycol222.jpeg</file>
+        <file>HEIF Imagecustom.icns</file>
+    </qresource>
+</RCC>
