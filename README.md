@@ -1,5 +1,8 @@
-# EXtractor_Anarchiver
+# EXtractor_Anarchiver (archived)
  Native MacOS advanced anarchiver app built in C++
+
+This project is now frozen, but if you want to help to revive it please go ahead
+
 
  The EXtractor tries to deliever convenient interaction with files, zipping, unzipping, password zipping and range of functionalities without any payment.
  
