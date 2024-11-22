@@ -48,7 +48,7 @@ archivingw::archivingw(QWidget *parent)
         "BZIP2",
         "XZ",
         "ZSTD",
-        "ISO9660",
+        "ISO9660 (same as ISO)",
         "ISO",   // Added ISO
         "7ZIP",
         "AR",
@@ -59,7 +59,8 @@ archivingw::archivingw(QWidget *parent)
         "TAR.Z",
         "TAR.GZ",
         "TAR.BZ2",
-        "TAR.XZ"
+        "TAR.XZ",
+        "RAR"
     };
 
 
@@ -137,18 +138,19 @@ void archivingw::on_pushButton_3_clicked()
     QString command;
     if (fileFormat == "ZIP") {
         command = QString("zip %1 %2 %3").arg(password.isEmpty() ? "" : QString("-P %1").arg(password), outputArchive + ".zip", fullPath);
-    } else if (fileFormat == "TAR") {
-        command = QString("tar -cvf %1 %2").arg(outputArchive + ".tar", fullPath);
+    } else if (fileFormat == "RAR") {
+        command = QString("rar a %1 %2").arg(outputArchive + ".rar", fullPath);
     } else if (fileFormat == "GZIP") {
-        command = QString("gzip -k %2 -c > %1").arg(outputArchive + ".gz", fullPath);
+        command = QString("gzip -k -c %1 > %2").arg(fullPath, outputArchive + ".gz");
     } else if (fileFormat == "BZIP2") {
-        command = QString("bzip2 -k %2 -c > %1").arg(outputArchive + ".bz2", fullPath);
+        command = QString("bzip2 -k -c %1 > %2").arg(fullPath, outputArchive + ".bz2");
     } else if (fileFormat == "XZ") {
-        command = QString("xz -k %2 -c > %1").arg(outputArchive + ".xz", fullPath);
+        command = QString("xz -k -c %1 > %2").arg(fullPath, outputArchive + ".xz");
     } else if (fileFormat == "ZSTD") {
-        command = QString("zstd -k %2 -o %1").arg(outputArchive + ".zst", fullPath);
+        command = QString("zstd -k -o %2 %1").arg(fullPath, outputArchive + ".zst");
     } else if (fileFormat == "ISO") {
-        command = QString("mkisofs -o %1 %2").arg(outputArchive + ".iso", fullPath);
+        command = QString("hdiutil makehybrid -o %1 %2").arg(outputArchive + ".iso", fullPath);
+
     } else if (fileFormat == "7ZIP") {
         command = QString("7z a %1 %2").arg(outputArchive + ".7z", fullPath);
     } else if (fileFormat == "AR") {
@@ -158,9 +160,9 @@ void archivingw::on_pushButton_3_clicked()
     } else if (fileFormat == "LZ4") {
         command = QString("lz4 %2 %1").arg(outputArchive + ".lz4", fullPath);
     } else if (fileFormat == "LZIP") {
-        command = QString("lzip -k %2 -o %1").arg(outputArchive + ".lz", fullPath);
+        command = QString("lzip -k -o %2 %1").arg(fullPath, outputArchive + ".lz");
     } else if (fileFormat == "Z") {
-        command = QString("compress -c %2 > %1").arg(outputArchive + ".Z", fullPath);
+        command = QString("compress -c %1 > %2").arg(fullPath, outputArchive + ".Z");
     } else if (fileFormat == "TAR.Z") {
         command = QString("tar -czf %1 %2").arg(outputArchive + ".tar.Z", fullPath);
     } else if (fileFormat == "TAR.GZ") {
@@ -170,17 +172,35 @@ void archivingw::on_pushButton_3_clicked()
     } else if (fileFormat == "TAR.XZ") {
         command = QString("tar -cJf %1 %2").arg(outputArchive + ".tar.xz", fullPath);
     }
-    // Add other formats as necessary if you will contribute
+
+    qDebug() << "Command to execute:" << command;
 
     QProcess *process = new QProcess(this);
-    process->start("zsh", QStringList() << "-c" << command);
+    QStringList arguments;
+    arguments << "-c" << command;
 
-    connect(process, &QProcess::readyReadStandardOutput, [process]() {
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("PATH", "/opt/homebrew/bin:" + env.value("PATH"));
+    process->setProcessEnvironment(env);
+
+    process->start("zsh", arguments);
+
+    if (!process->waitForStarted()) {
+        qDebug() << "Failed to start process:" << process->errorString();
+        ui->pushButton_3->setVisible(true);
+        ui->label_6->setVisible(false);
+        return;
+    }
+
+    process->waitForFinished();
+
+    if (process->exitStatus() == QProcess::CrashExit) {
+        qDebug() << "Process crashed.";
+    } else {
+        qDebug() << "Process finished with exit code:" << process->exitCode();
         qDebug() << process->readAllStandardOutput();
-    });
-    connect(process, &QProcess::readyReadStandardError, [process]() {
         qDebug() << process->readAllStandardError();
-    });
+    }
 
     ui->pushButton_3->setVisible(true);
     ui->label_6->setVisible(false);

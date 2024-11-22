@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     createAndDeleteTempFile();
     QApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/rec/HEIF Imagecustom.icns"));
+    app.setWindowIcon(QIcon(":/rec/archivecon copy22.icns"));
     MainWindow w;
     w.setWindowTitle("EXtractor universal!");
     w.setFixedSize(400, 300);

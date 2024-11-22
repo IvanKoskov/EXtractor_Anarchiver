@@ -8,6 +8,10 @@
 #include <QFileInfo>
 #include <zip.h>
 #include <QProcess>
+#include <zlib.h>
+#include <archive.h>
+#include <archive_entry.h>
+
 extracting::extracting(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::extracting)
@@ -62,7 +66,7 @@ void extracting::on_pushButton_2_clicked()
 
     if (!fileName.isEmpty()) {
         selectedFilePath = fileName;
-        qDebug() << "Selected File Path:" << selectedFilePath; // Debug output
+        qDebug() << "Selected File Path:" << selectedFilePath;
     } else {
         qDebug() << "No file selected!";
     }
@@ -82,63 +86,117 @@ void extracting::on_pushButton_clicked()
 
 
 
+#include <QProcess>
+#include <QDebug>
+#include <QFileInfo>
+#include <QFile>
+#include <QTextStream>
 
 void extracting::extractArchive(const QString &selectedFilePath, const QString &savePath) {
-    qDebug() << "Extracting archive:" << selectedFilePath << "to" << savePath;
+    qDebug() << "Extracting file from:" << selectedFilePath << "to" << savePath;
 
-    // Ensure savePath is a valid directory
-    QDir dir(savePath);
-    if (!dir.exists()) {
-        qDebug() << "Output directory does not exist.";
-        return;
-    }
-
-    QString fileFormat;
-    if (selectedFilePath.endsWith(".zip", Qt::CaseInsensitive)) {
-        fileFormat = "ZIP";
-    } else if (selectedFilePath.endsWith(".tar", Qt::CaseInsensitive) ||
-               selectedFilePath.endsWith(".tar.gz", Qt::CaseInsensitive) ||
-               selectedFilePath.endsWith(".tgz", Qt::CaseInsensitive)) {
-        fileFormat = "TAR";
-    } else if (selectedFilePath.endsWith(".gz", Qt::CaseInsensitive)) {
-        fileFormat = "GZ";
-    } else if (selectedFilePath.endsWith(".bz2", Qt::CaseInsensitive)) {
-        fileFormat = "BZ2";
-    } else {
-        qDebug() << "Unsupported file format.";
-        return;
-    }
-
+    QFileInfo fileInfo(selectedFilePath);
+    QString fileExtension = fileInfo.suffix().toLower();
     QString command;
-    if (fileFormat == "ZIP") {
-        command = QString("unzip -o '%1' -d '%2'").arg(selectedFilePath, savePath);
-    } else if (fileFormat == "TAR") {
-        command = QString("tar -xvf '%1' -C '%2'").arg(selectedFilePath, savePath);
-    } else if (fileFormat == "GZ") {
-        command = QString("gunzip -c '%1' > '%2/%3'").arg(selectedFilePath, savePath, QFileInfo(selectedFilePath).baseName());
-    } else if (fileFormat == "BZ2") {
-        command = QString("bunzip2 -c '%1' > '%2/%3'").arg(selectedFilePath, savePath, QFileInfo(selectedFilePath).baseName());
+    QString extractedFilePath = savePath + "/" + fileInfo.baseName(); // Default file name
+
+    // Handle zip files
+    if (fileExtension == "zip") {
+        command = QString("unzip \"%1\" -d \"%2\"").arg(selectedFilePath, savePath);
+    }
+    // Handle rar files
+    else if (fileExtension == "rar") {
+        command = QString("/opt/homebrew/bin/unar \"%1\" -o \"%2\"").arg(selectedFilePath, savePath);
+    }
+    // Handle tar files (including tar.gz, tar.bz2, tar.xz)
+    else if (fileExtension == "tar") {
+        command = QString("tar -xvf \"%1\" -C \"%2\"").arg(selectedFilePath, savePath);  // for tar.gz, tar.bz2, tar.xz, etc.
+    } else if (fileExtension == "gz") {
+        command = QString("tar -xzvf \"%1\" -C \"%2\"").arg(selectedFilePath, savePath);  // for .tar.gz
+    } else if (fileExtension == "bz2") {
+        command = QString("tar -xjvf \"%1\" -C \"%2\"").arg(selectedFilePath, savePath);  // for .tar.bz2
+    } else if (fileExtension == "xz") {
+        command = QString("tar -xJvf \"%1\" -C \"%2\"").arg(selectedFilePath, savePath);  // for .tar.xz
+    }
+    // Handle gzip (non-tar) files
+    else if (fileExtension == "gz") {
+        command = QString("gzip -d \"%1\" -c > \"%2\"").arg(selectedFilePath, extractedFilePath);
+    }
+    // Handle bzip2 files
+    else if (fileExtension == "bz2") {
+        command = QString("bzip2 -d \"%1\" -c > \"%2\"").arg(selectedFilePath, extractedFilePath);
+    }
+    // Handle XZ files
+    else if (fileExtension == "xz") {
+        command = QString("xz -d \"%1\" -c > \"%2\"").arg(selectedFilePath, extractedFilePath);
+    }
+    // Handle ZST (Zstandard) files
+    else if (fileExtension == "zst") {
+        command = QString("/opt/homebrew/bin/zstd -d \"%1\" -o \"%2\"").arg(selectedFilePath, extractedFilePath);
+    }
+    else {
+        qDebug() << "Unsupported file format for extraction!";
+        return;
     }
 
-    // Start the terminal process using `zsh` to execute the command
+    qDebug() << "Command to execute: " << command;
+
+    // Start the extraction process using QProcess
     QProcess *process = new QProcess(this);
-    process->start("zsh", QStringList() << "-c" << command); // Use zsh or bash
+    process->setWorkingDirectory(savePath);  // Set the working directory to the save path
 
-    // Handle output and errors
-    connect(process, &QProcess::readyReadStandardOutput, [process]() {
-        qDebug() << process->readAllStandardOutput();
-    });
-    connect(process, &QProcess::readyReadStandardError, [process]() {
-        qDebug() << process->readAllStandardError();
-    });
+    // Execute the command
+    process->start("zsh", QStringList() << "-c" << command);
 
-    // Optionally wait for the process to finish and check exit status
+    if (!process->waitForStarted()) {
+        qDebug() << "Failed to start extraction process:" << process->errorString();
+        return;
+    }
+
+    // Wait for the process to finish
     process->waitForFinished();
-    int exitCode = process->exitCode();
-    if (exitCode != 0) {
-        qDebug() << "Extraction failed with exit code:" << exitCode;
+
+    // Check the process exit code to determine success/failure
+    if (process->exitStatus() == QProcess::CrashExit) {
+        qDebug() << "Process crashed!";
+    } else {
+        qDebug() << "Process finished with exit code:" << process->exitCode();
+        qDebug() << process->readAllStandardOutput();
+        qDebug() << process->readAllStandardError();
+    }
+
+    // After extraction, check the file type to ensure it's correctly identified
+    QString detectCommand = QString("file --mime-type -b \"%1\"").arg(extractedFilePath);
+    QProcess detectProcess;
+    detectProcess.start("bash", QStringList() << "-c" << detectCommand);
+    detectProcess.waitForFinished();
+
+    QString mimeType = detectProcess.readAllStandardOutput().trimmed();
+    qDebug() << "Detected MIME type: " << mimeType;
+
+    // Based on MIME type, rename the file to have the correct extension
+    if (mimeType.startsWith("image/jpeg")) {
+        extractedFilePath += ".jpeg";
+    } else if (mimeType.startsWith("image/png")) {
+        extractedFilePath += ".png";
+    } else if (mimeType.startsWith("text/plain")) {
+        extractedFilePath += ".txt";
+    } else if (mimeType.startsWith("application/pdf")) {
+        extractedFilePath += ".pdf";
+    } else {
+        qDebug() << "Unsupported MIME type!";
+        return;
+    }
+
+    // Rename the file to the correct extension
+    if (QFile::rename(extractedFilePath, savePath + "/" + fileInfo.baseName() + "." + mimeType.split('/').last())) {
+        qDebug() << "Extraction successful, saved as: " << extractedFilePath;
+    } else {
+        qDebug() << "Failed to rename the extracted file!";
     }
 }
+
+
 
 
 

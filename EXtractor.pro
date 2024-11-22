@@ -36,8 +36,7 @@ RESOURCES += \
     resourses.qrc
 
 
+INCLUDEPATH += /opt/homebrew/Cellar/libarchive/3.7.7/include
 INCLUDEPATH += /opt/homebrew/include
 
-
-LIBS += -L/opt/homebrew/lib -lzip
-
+LIBS += -L/opt/homebrew/lib -larchive -lzip
